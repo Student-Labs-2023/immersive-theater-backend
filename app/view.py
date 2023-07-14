@@ -8,7 +8,12 @@ from models import Perfomances
 def page_perfomances():
     page_num = request.args.get('page', default = 1, type = int)
     per_page_num = request.args.get('per_page', default = 5, type = int)
-    return '', 200
+    engine = create_engine('sqlite:///')
+    metadata.create_all(engine)
+    tmp = Perfomances()
+    db.session.add(tmp)
+    result = db.session.query(Perfomances).filter(Perfomances.id < per_page_num)
+    return engine.connect().execute(text(str(result))), 200
 
 
 @app.route('/perfomances/<int:perfomance_id>', methods=['GET'])

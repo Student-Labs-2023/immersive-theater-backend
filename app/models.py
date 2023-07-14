@@ -6,12 +6,12 @@ class Authors(db.Model):
     thumbnail_link = db.Column(db.String(300))
 
 class PerfomanceAuthors(db.Model):
-    author_id = db.Column(db.Integer, primary_key=True, db.ForeignKey('authors.id'))
-    perfomance_id = db.Column(db.Integer, primary_key=True, db.ForeignKey('perfomances.id'))
+    author_id = db.Column(db.Integer, db.ForeignKey('authors.id'), primary_key=True)
+    perfomance_id = db.Column(db.Integer, db.ForeignKey('perfomances.id'), primary_key=True)
     role = db.Column(db.String(60))
 
 class PerfomanceImages(db.Model):
-    perfomance_id = db.Column(db.Integer, primary_key=True, db.ForeignKey('perfomances.id'))
+    perfomance_id = db.Column(db.Integer, db.ForeignKey('perfomances.id'), primary_key=True)
     image_link = db.Column(db.String(300), primary_key=True)
 
 class Perfomances(db.Model):
@@ -24,11 +24,11 @@ class Perfomances(db.Model):
     thumbnail_link = db.Column(db.String(300))
 
 class AudioImages(db.Model):
-    audio_id = db.Column(db.Integer, primary_key=True, db.ForeignKey('audio.id'))
+    audio_id = db.Column(db.Integer, db.ForeignKey('audio.id'), primary_key=True)
     image_link = db.Column(db.String(300), primary_key=True)
 
 class Audio(db.Model):
-    perfomance_id = db.Column(db.Integer, primary_key=True, db.ForeignKey('perfomances.id'))
+    perfomance_id = db.Column(db.Integer, db.ForeignKey('perfomances.id'), primary_key=True)
     order = db.Column(db.Integer, primary_key=True)
     id = db.Column(db.Integer)
     place_id = db.Column(db.Integer, db.ForeignKey('places.id'))
@@ -37,9 +37,8 @@ class Audio(db.Model):
     short_audio_link = db.Column(db.String(100))
     description = db.Column(db.String(300))
 
-class Places(db.Mdoel):
-    id = db.Column(db.Integer)
+class Places(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
     latitude = db.Column(db.Double)
     longitude = db.Column(db.Double)
-
