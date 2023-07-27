@@ -1,11 +1,6 @@
 from . models import Authors, PerfomanceAuthors, PerfomanceImages, Perfomances, AudioImages, Audio, Places
 
 
-def int_to_str_duration(duration):
-    print(duration)
-    m = duration // 60
-    return f"{m} min."
-
 def get_all_info_about_perfomance(perfomance_id):
     result = dict()
     authors = dict()
@@ -14,7 +9,7 @@ def get_all_info_about_perfomance(perfomance_id):
     place = dict()
     perf_query = Perfomances.query.filter_by(id=perfomance_id).first()
     if not perf_query:
-        return 'Not valid id', 400
+        return Exception("Invalid id")
     authors_id_query = PerfomanceAuthors.query.filter_by(perfomance_id=perfomance_id).all()
     for author in authors_id_query:
         authors_query = Authors.query.filter_by(id=author.author_id).first()
@@ -27,10 +22,10 @@ def get_all_info_about_perfomance(perfomance_id):
             audio_images.append(str(audio_image.image_link))
         places_query = Places.query.filter_by(id=audio.place_id).first()
         place.update({'name': places_query.name, 'latitude': places_query.latitude, 'longitude': places_query.longitude})
-        audios.append({'place': place, 'name':audio.name, 'audio_link': audio.audio_link, 'short_audio_link': audio.short_audio_link, images: audio_images})
+        audios.append({'place': place, 'name':audio.name, 'audio_link': audio.audio_link, 'short_audio_link': audio.short_audio_link, 'images': audio_images})
 
     images_query = PerfomanceImages.query.filter_by(perfomance_id=perfomance_id).all()
     for image in images_query:
         images.append(str(image.image_link))
-    result.update({'id': perf_query.id, 'name': perf_query.name, 'image_link': perf_query.thumbnail_link, 'description': perf_query.description, 'duration': int_to_str_duration(perf_query.duration), 'authots': authors, 'images': images, 'audios': audios})
+    result.update({'id': perf_query.id, 'name': perf_query.name, 'image_link': perf_query.thumbnail_link, 'description': perf_query.description, 'duration': perf_query.duration, 'authots': authors, 'images': images, 'audios': audios})
     return result

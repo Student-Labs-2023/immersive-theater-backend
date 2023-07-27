@@ -1,5 +1,5 @@
 from . models import Authors, PerfomanceAuthors, PerfomanceImages, Perfomances, AudioImages, Audio, Places
-from app.utils import int_to_str_duration, get_all_info_about_perfomance
+from app.utils import get_all_info_about_perfomance
 from flask import Blueprint, request
 import json
 
@@ -24,4 +24,7 @@ def page_perfomances():
 @api.route('/perfomances/<int:perfomance_id>', methods=['GET'])
 def perfomance_by_id(perfomance_id):
     result = get_all_info_about_perfomance(perfomance_id)
-    return json.dumps(result), 200
+    if result.__class__ != Exception:
+        return json.dumps(result), 200
+    else: 
+        return '', 400
