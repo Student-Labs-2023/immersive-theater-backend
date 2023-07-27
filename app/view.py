@@ -10,7 +10,7 @@ def page_perfomances():
     page_num = request.args.get('page', default = 1, type = int)
     per_page_num = request.args.get('per_page', default = 5, type = int)
     result = dict()
-    perf_query = Perfomances.query.filter(Perfomances.id.in_([page_num*per_page_num, page_num*per_page_num+per_page_num])).all()  #TODO: Check first perfomances from page
+    perf_query = Perfomances.query.filter(Perfomances.id >= (page_num-1)*per_page_num, Perfomances.id <= (page_num-1)*per_page_num+per_page_num).all()  #TODO: Check first perfomances from page
     for perfomance in perf_query:
         authors = dict()
         authors_id_query = PerfomanceAuthors.query.filter_by(perfomance_id=perfomance.id).all()
