@@ -1,9 +1,19 @@
-from flask import Flask, request
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///immersive_theater.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-app.app_context().push()
 
+db = SQLAlchemy()
+
+
+def create_app():
+    app = Flask(__name__)
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///immersive_theater.db'
+
+    db.init_app(app)
+    
+
+    from .view import api as api_blueprint
+    app.register_blueprint(api_blueprint)
+
+    return app

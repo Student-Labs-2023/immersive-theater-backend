@@ -1,0 +1,142 @@
+openapi: 3.0.3
+info:
+  title: Immersive-theater-backend
+  version: 0.0.1
+servers:
+  - url: https://localhost:5000/
+    description: Dev server
+paths:
+  /perfomances:
+    get:
+      summary: Method for obtaining a list of performance information
+      tags: 
+        - Perfomances
+      responses:
+        '200':
+          description: Successful geting.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Perfomances"
+    parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Returns the page equal in number to this variable.
+      - in: query
+        name: per_page
+        schema:
+          type: integer
+        description: Number of performances per page.
+
+  /perfomances/{id}:
+    get:
+      summary: Method for obtaining full information about perfomance by his id
+      tags: 
+        - Perfomances
+      responses:
+        '200':
+          description: Successful geting.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Full info perfomance'
+
+components:
+  schemas:
+    
+    Performance:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 1
+        name:
+          type: string
+          example: Shebalin
+        image_link:
+          type: string
+          example: "https://images.google.com"
+        authors:
+          type: array
+          items:
+             $ref: "#/components/schemas/Author"
+    
+    Full info perfomance:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 1
+        name:
+          type: string
+          example: Shebalin
+        image_link:
+          type: string
+          example: "https://images.google.com"
+        description:
+          type: string
+          example: Some description...
+        duration:
+          type: string
+          example: 1 h. 20 min. 30 sec.
+        authors:
+          type: array
+          items:
+             $ref: "#/components/schemas/Author"
+        images:
+          type: array
+          items:
+            type: string
+
+    Perfomances:
+      type: array
+      items:
+        $ref: "#/components/schemas/Performance"
+    
+    Audio:
+      type: object
+      properties: 
+        place:
+          type: object
+          properties: 
+            name:
+              type: string
+              example: Spot 1
+            latitude:
+              type: number
+              format: double
+              example: -32.12434523
+            longitude:
+              type: number
+              format: double
+              example: 55.7456312
+        name:
+          type: string
+          example: Audio 1
+        audio_link:
+          type: string
+          example: https://audiosender.com
+        short_audio_link:
+          type: string
+          example: https://audiosender.com?free_audio=true
+        images:
+          type: array
+          items:
+            type: string
+    Author:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 1
+        full_name:
+          type: string
+          example: Full name
+        image_link:
+          type: string
+          example: "https://images.google.com"
+        role:
+          type: string
+          example: author
