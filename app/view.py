@@ -9,16 +9,26 @@ api = Blueprint('api', __name__)
 def page_perfomances():
     page_num = request.args.get('page', default = 1, type = int)
     per_page_num = request.args.get('per_page', default = 5, type = int)
-    result = dict()
-    perf_query = Perfomances.query.filter(Perfomances.id >= (page_num-1)*per_page_num, Perfomances.id <= (page_num-1)*per_page_num+per_page_num).all()  #TODO: Check first perfomances from page
+    result = list()
+    perf_query = Perfomances.query.filter(Perfomances.id >= (page_num-1)*per_page_num, Perfomances.id <= page_num*per_page_num).all()
     for perfomance in perf_query:
-        authors = dict()
+        authors = list()
+        place = dict()
+        images = list()
         authors_id_query = PerfomanceAuthors.query.filter_by(perfomance_id=perfomance.id).all()
         for author in authors_id_query:
             authors_query = Authors.query.filter_by(id=author.author_id).first()
-            authors.update({'id': authors_query.id, 'full_name': authors_query.full_name, 'image_link': authors_query.thumbnail_link, 'role': author.role})
-        result.update({'id': perfomance.id, 'name': perfomance.name, 'image_link': perfomance.cover_image_link, 'authors':authors})
-    return json.dumps(result), 200
+            authors.append({'id': authors_query.id, 'full_name': authors_query.full_name, 'image_link': authors_query.thumbnail_link, 'role': author.role})
+        audio_query = Audio.query.filter_by(perfomance_id=perfomance.id).first()
+        place_id = audio_query.place_id
+        audio_id = audio_query.id
+        audio_images_query = AudioImages.query.filter_by(audio_id=audio_id).all()
+        for audio_image in audio_images_query:
+            images.append(audio_image.image_link)
+        place_query = Places.query.filter_by(id=place_id).first()
+        place.update({'name': place_query.name, 'latitude': place_query.latitude, 'longitude': place_query.longitude, 'address': place_query.address})
+        result.append({'id': perfomance.id, 'tag':perfomance.tag, 'name': perfomance.name, 'image_link':perfomance.cover_image_link, 'authors':authors, 'first_place': {'place': place, 'name': audio_query.name,'audio_link': audio_query.audio_link, 'short_audio_link': audio_query.short_audio_link, 'images': images}})
+    return json.dumps({"data": result}), 200
 
 
 @api.route('/perfomances/<int:perfomance_id>', methods=['GET'])

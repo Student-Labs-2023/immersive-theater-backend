@@ -22,6 +22,7 @@ class Perfomances(db.Model):
     duration = db.Column(db.Integer, nullable=False)
     cover_image_link = db.Column(db.String(300), nullable=False)
     thumbnail_link = db.Column(db.String(300), nullable=False)
+    tag = db.Column(db.String(20), nullable=False)
 
 class AudioImages(db.Model):
     audio_id = db.Column(db.Integer, db.ForeignKey('audio.id'), primary_key=True)
@@ -42,3 +43,4 @@ class Places(db.Model):
     name = db.Column(db.String(100), nullable=False)
     latitude = db.Column(db.Double, nullable=False)
     longitude = db.Column(db.Double, nullable=False)
+    address = db.Column(db.String(100), nullable=False)
