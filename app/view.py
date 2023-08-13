@@ -27,7 +27,7 @@ def page_perfomances():
             images.append(audio_image.image_link)
         place_query = Places.query.filter_by(id=place_id).first()
         place.update({'name': place_query.name, 'latitude': place_query.latitude, 'longitude': place_query.longitude, 'address': place_query.address})
-        result.append({'id': perfomance.id, 'tag':perfomance.tag, 'name': perfomance.name, 'image_link':perfomance.cover_image_link, 'authors':authors, 'first_place': {'place': place, 'name': audio_query.name,'audio_link': audio_query.audio_link, 'short_audio_link': audio_query.short_audio_link, 'images': images}})
+        result.append({'id': perfomance.id, 'tag':perfomance.tag, 'name': perfomance.name, 'image_link':perfomance.cover_image_link, 'authors':authors, 'duration': perfomance.duration, 'first_place': {'place': place, 'name': audio_query.name,'audio_link': audio_query.audio_link, 'short_audio_link': audio_query.short_audio_link, 'images': images}})
     return json.dumps({"data": result}), 200
 
 

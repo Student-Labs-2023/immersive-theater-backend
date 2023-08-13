@@ -3,7 +3,7 @@ sys.path.append("..")
 
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from app.models import * 
+from app.models import Authors, PerfomanceAuthors, PerfomanceImages, Perfomances, AudioImages, Audio, Places 
 
 def create_admin_dashboard(app, db):
 
