@@ -5,13 +5,13 @@ from SberQR import AsyncSberQR
 member_id = '00003698'  
 tid = '29148600'  # ID  терминала/Точки. Получить в ЛК Сбрербанк бизнес на странице Информация о точке
 id_qr = '3001039094'  # Номер наклейки с QR-кодом. Получить в ЛК Сбрербанк бизнес Информация о точке/список оборудования
-client_id = '8754fe76-3e87-48c5-8e52-7597414b4b35'  # получить на api.developer.sber.ru
-client_secret = '53105a42-b0f1-42e6-9b4d-1961a70d5288'  # получить на api.developer.sber.ru
+client_id = '06203e91-28c9-4fab-a833-44b28d1027fd'  # получить на api.developer.sber.ru
+client_secret = '37bc021b-7495-4877-babf-d741cf103997'  # получить на api.developer.sber.ru
 
 #
 crt_from_pkcs12 = f'{os.getcwd()}/client_cert.crt'  # Для асинхронной версии требуется распаковать сертификат
 key_from_pkcs12 = f'{os.getcwd()}/private.key'  # Для асинхронной версии требуется распаковать приватный ключ
-pkcs12_password = 'ManjaroUser2204'  # Пароль от файла сертификат. Получается на api.developer.sber.ru
+pkcs12_password = 'Ktybyf45'  # Пароль от файла сертификат. Получается на api.developer.sber.ru
 russian_crt = f'{os.getcwd()}/Cert_CA.pem'  # Сертификат мин.цифры для установления SSL соединения
 
 sber_qr = AsyncSberQR(member_id=member_id, id_qr=tid, tid=tid,
