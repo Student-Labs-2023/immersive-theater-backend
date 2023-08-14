@@ -25,5 +25,5 @@ def get_all_info_about_perfomance(perfomance_id):
     images_query = PerfomanceImages.query.filter_by(perfomance_id=perfomance_id).all()
     for image in images_query:
         images.append(str(image.image_link))
-    result.update({'id': perf_query.id, 'tag': perf_query.tag, 'name': perf_query.name, 'image_link': perf_query.thumbnail_link, 'description': perf_query.description, 'duration': perf_query.duration, 'authots': authors, 'images': images, 'audios': audios})
+    result.update({'id': perf_query.id, 'tag': perf_query.tag, 'name': perf_query.name, 'image_link': perf_query.thumbnail_link, 'description': perf_query.description, 'duration': perf_query.duration, 'authors': authors, 'images': images, 'audios': audios})
     return result

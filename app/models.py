@@ -1,18 +1,27 @@
 from . import db
 
 class Authors(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
     full_name = db.Column(db.String(300), nullable=False)
     thumbnail_link = db.Column(db.String(300), nullable=False)
+    
+    def __repr__(self):
+        return f"<authors {self.id}>"
 
 class PerfomanceAuthors(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey('authors.id'), primary_key=True)
-    perfomance_id = db.Column(db.Integer, db.ForeignKey('perfomances.id'), primary_key=True)
+    perfomance_id = db.Column(db.Integer, db.ForeignKey('perfomances.id'), nullable=False)
     role = db.Column(db.String(60), nullable=False)
 
+    def __repr__(self):
+        return f"<perfomance_authors {self.author_id}>"
+
 class PerfomanceImages(db.Model):
-    perfomance_id = db.Column(db.Integer, db.ForeignKey('perfomances.id'), primary_key=True)
-    image_link = db.Column(db.String(300), nullable=False, primary_key=True)
+    perfomance_id = db.Column(db.Integer, db.ForeignKey('perfomances.id'), nullable=False)
+    image_link = db.Column(db.String(300), primary_key=True, nullable=False)
+
+    def __repr__(self):
+        return f"<perfomance_images {self.perfomance_id}>"
 
 class Perfomances(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -24,12 +33,18 @@ class Perfomances(db.Model):
     thumbnail_link = db.Column(db.String(300), nullable=False)
     tag = db.Column(db.String(20), nullable=False)
 
+    def __repr__(self):
+        return f"<perfomances {self.id}>"
+
 class AudioImages(db.Model):
-    audio_id = db.Column(db.Integer, db.ForeignKey('audio.id'), primary_key=True)
+    audio_id = db.Column(db.Integer, db.ForeignKey('audio.id'))
     image_link = db.Column(db.String(300), nullable=False, primary_key=True)
+    
+    def __repr__(self):
+        return f"<audio_images {self.audio_id}>"
 
 class Audio(db.Model):
-    perfomance_id = db.Column(db.Integer, db.ForeignKey('perfomances.id'), primary_key=True)
+    perfomance_id = db.Column(db.Integer, db.ForeignKey('perfomances.id'))
     order = db.Column(db.Integer, primary_key=True)
     id = db.Column(db.Integer, nullable=False)
     place_id = db.Column(db.Integer, db.ForeignKey('places.id'))
@@ -38,9 +53,15 @@ class Audio(db.Model):
     short_audio_link = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(300), nullable=False)
 
+    def __repr__(self):
+        return f"<audio {self.id}, {self.name}>"
+
 class Places(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     latitude = db.Column(db.Double, nullable=False)
     longitude = db.Column(db.Double, nullable=False)
     address = db.Column(db.String(100), nullable=False)
+
+    def __repr__(self):
+        return f"<places {self.id}>"
