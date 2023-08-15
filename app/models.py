@@ -10,14 +10,14 @@ class Authors(db.Model):
 
 class PerfomanceAuthors(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey('authors.id'), primary_key=True)
-    perfomance_id = db.Column(db.Integer, db.ForeignKey('perfomances.id'), nullable=False)
+    perfomance_id = db.Column(db.Integer, db.ForeignKey('perfomances.id'), primary_key=True)
     role = db.Column(db.String(60), nullable=False)
 
     def __repr__(self):
         return f"<perfomance_authors {self.author_id}>"
 
 class PerfomanceImages(db.Model):
-    perfomance_id = db.Column(db.Integer, db.ForeignKey('perfomances.id'), nullable=False)
+    perfomance_id = db.Column(db.Integer, db.ForeignKey('perfomances.id'), primary_key=True)
     image_link = db.Column(db.String(300), primary_key=True, nullable=False)
 
     def __repr__(self):
@@ -26,31 +26,31 @@ class PerfomanceImages(db.Model):
 class Perfomances(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    ticket_link = db.Column(db.String(300), nullable=False)
     description = db.Column(db.String(300), nullable=False)
     duration = db.Column(db.Integer, nullable=False)
     cover_image_link = db.Column(db.String(300), nullable=False)
     thumbnail_link = db.Column(db.String(300), nullable=False)
     tag = db.Column(db.String(20), nullable=False)
+    price = db.Column(db.Integer, nullable=False)
 
     def __repr__(self):
         return f"<perfomances {self.id}>"
 
 class AudioImages(db.Model):
-    audio_id = db.Column(db.Integer, db.ForeignKey('audio.id'))
+    audio_id = db.Column(db.Integer, db.ForeignKey('audio.id'), primary_key=True)
     image_link = db.Column(db.String(300), nullable=False, primary_key=True)
     
     def __repr__(self):
         return f"<audio_images {self.audio_id}>"
 
 class Audio(db.Model):
-    perfomance_id = db.Column(db.Integer, db.ForeignKey('perfomances.id'))
+    perfomance_id = db.Column(db.Integer, db.ForeignKey('perfomances.id'), primary_key=True)
     order = db.Column(db.Integer, primary_key=True)
     id = db.Column(db.Integer, nullable=False)
     place_id = db.Column(db.Integer, db.ForeignKey('places.id'))
     name = db.Column(db.String(100), nullable=False)
     audio_link = db.Column(db.String(300), nullable=False)
-    short_audio_link = db.Column(db.String(100), nullable=False)
+    short_audio_link = db.Column(db.String(300), nullable=False)
     description = db.Column(db.String(300), nullable=False)
 
     def __repr__(self):

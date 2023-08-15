@@ -1,6 +1,14 @@
-import os
 import asyncio
+import logging
+import os
+from typing import List, Dict, Union
+
+import qrcode
+import requests
+
+# import aioredis
 from SberQR import AsyncSberQR
+from SberQR.types import CancelType
 
 member_id = '00003698'  
 tid = '29148600'  # ID  терминала/Точки. Получить в ЛК Сбрербанк бизнес на странице Информация о точке
@@ -14,18 +22,14 @@ key_from_pkcs12 = f'{os.getcwd()}/private.key'  # Для асинхронной 
 pkcs12_password = 'Ktybyf45'  # Пароль от файла сертификат. Получается на api.developer.sber.ru
 russian_crt = f'{os.getcwd()}/Cert_CA.pem'  # Сертификат мин.цифры для установления SSL соединения
 
-sber_qr = AsyncSberQR(member_id=member_id, id_qr=tid, tid=tid,
+sber_qr = AsyncSberQR(member_id,
+                      id_qr=tid, tid=tid,
                       client_id=client_id, client_secret=client_secret,
                       crt_file_path=crt_from_pkcs12, key_file_path=key_from_pkcs12,
                       pkcs12_password=pkcs12_password,
                       russian_crt=russian_crt)
-positions = [{"position_name": 'Товар за 10 рублей',
-              "position_count": 1,
-              "position_sum": 1,
-              "position_description": 'Какой-то товар за 10 рублей'}
-             ]
 
-async def main_func(order_sum, order_number, positions):
+async def main_func(order_sum, order_number, positions: Union[List, Dict]):
     data = await sber_qr.creation(
         description=f'Оплата заказа {order_number}',
         order_sum=order_sum,
