@@ -51,10 +51,12 @@ def payment():
     performance_name = Perfomances.query.filter_by(id=performance_id_num).first().name
     return createPayment(label_str, price, performance_name)
 
-@api.route('/notification', methods=['GET', 'POST'])
-def a():
-    if request == 'POST':
-        return '', 200
-    else:
+@api.route('/notification', methods=['POST'])
+def notification():
+    # TODO: Fix json view 
+    #request_data = json.loads(next(iter(request.form.keys())))
+    #print(request_data)
+    #label_str = request_data['label']
+    #generate_ticket(label_str)
+    return '', 200        
         
-        return generate_ticket(), 200

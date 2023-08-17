@@ -1,13 +1,18 @@
-from . models import Authors, PerfomanceAuthors, PerfomanceImages, Perfomances, AudioImages, Audio, Places
+from . models import Authors, PerfomanceAuthors, PerfomanceImages, Perfomances, AudioImages, Audio, Places, Payments
 import string, random
- 
-def generate_ticket():
-    result = str()
+from . import db 
+
+def generate_ticket(label_str):
+    user_id, perfomance_id = label_str.split(":")
+    ticket = str()
     for i in range(1, 17):
-        result += random.choice(string.ascii_letters)
+        ticket += random.choice(string.ascii_letters)
         if i % 4 == 0 and i !=16:
-            result += '-'
-    return result
+            ticket += '-'
+    payment = Payments(user_id=user_id, perfomance_id=perfomance_id, ticket_link=ticket, status='success')
+    db.session.add(payment)
+    db.session.commit()
+    return ticket
 
 
 def get_all_info_about_perfomance(perfomance_id):
