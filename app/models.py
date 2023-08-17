@@ -65,3 +65,13 @@ class Places(db.Model):
 
     def __repr__(self):
         return f"<places {self.id}>"
+
+class Users(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    phone = db.Column(db.String(30), nullable=False)
+
+class Payments(db.Model):
+    user_id = db.Column(db.String, db.ForeignKey('users.id'), primary_key=True)
+    perfomance_id  = db.Column(db.Integer, db.ForeignKey('perfomances.id'), primary_key=True)
+    ticket_link = db.Column(db.String(300), nullable=False)
+    status = db.Column(db.String(30), nullable=False)

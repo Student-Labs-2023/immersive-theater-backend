@@ -4,7 +4,7 @@ WORKDIR /immersive-theater
 
 COPY . /immersive-theater
 
-RUN pip install -r requirements.txt
+RUN pip3.10 install -r requirements.txt
 
 EXPOSE 5000
 

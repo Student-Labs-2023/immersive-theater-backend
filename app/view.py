@@ -1,8 +1,10 @@
 from . models import Authors, PerfomanceAuthors, PerfomanceImages, Perfomances, AudioImages, Audio, Places
-from app.utils import get_all_info_about_perfomance
+from app.utils import get_all_info_about_perfomance, generate_ticket
 from flask import Blueprint, request
 from app.yoomoneyPayment import createPayment, checkPayment
 import json
+import requests
+
 
 api = Blueprint('api', __name__)
 
@@ -42,12 +44,17 @@ def perfomance_by_id(perfomance_id):
 
 @api.route('/payment', methods=['GET'])
 def payment():
-    label_str = request.args.get('label', default = None, type = str)
-    performance_id_num = request.args.get('id', default = None, type = int)
-    if performance_id_num==None:
-        return checkPayment(label_str)
-    else:
-        price = Perfomances.query.filter_by(id=performance_id_num).first().price
-        performance_name = Perfomances.query.filter_by(id=performance_id_num).first().name
-        return createPayment(label_str, price, performance_name)
+    user_id_num = request.args.get('user_id', default = None, type = int)
+    performance_id_num = request.args.get('performance_id', default = None, type = int)
+    label_str = str(user_id_num) + ':' + str(performance_id_num)
+    price = Perfomances.query.filter_by(id=performance_id_num).first().price
+    performance_name = Perfomances.query.filter_by(id=performance_id_num).first().name
+    return createPayment(label_str, price, performance_name)
 
+@api.route('/notification', methods=['GET', 'POST'])
+def a():
+    if request == 'POST':
+        return '', 200
+    else:
+        
+        return generate_ticket(), 200

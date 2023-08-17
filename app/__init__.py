@@ -3,8 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 
-db = SQLAlchemy()
 
+db = SQLAlchemy()
 
 
 def create_app():
@@ -19,5 +19,6 @@ def create_app():
 
     from .view import api as api_blueprint
     app.register_blueprint(api_blueprint)
+
 
     return app
