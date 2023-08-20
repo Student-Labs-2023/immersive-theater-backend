@@ -1,4 +1,18 @@
-from . models import Authors, PerfomanceAuthors, PerfomanceImages, Perfomances, AudioImages, Audio, Places
+from . models import Authors, PerfomanceAuthors, PerfomanceImages, Perfomances, AudioImages, Audio, Places, Payments
+import string, random
+from . import db 
+
+def generate_ticket(label_str):
+    user_id, perfomance_id = label_str.split(":")
+    ticket = str()
+    for i in range(1, 17):
+        ticket += random.choice(string.ascii_letters)
+        if i % 4 == 0 and i !=16:
+            ticket += '-'
+    payment = Payments(user_id=user_id, perfomance_id=perfomance_id, ticket_link=ticket, status='success')
+    db.session.add(payment)
+    db.session.commit()
+    return ticket
 
 
 def get_all_info_about_perfomance(perfomance_id):
@@ -25,5 +39,5 @@ def get_all_info_about_perfomance(perfomance_id):
     images_query = PerfomanceImages.query.filter_by(perfomance_id=perfomance_id).all()
     for image in images_query:
         images.append(str(image.image_link))
-    result.update({'id': perf_query.id, 'tag': perf_query.tag, 'name': perf_query.name, 'image_link': perf_query.thumbnail_link, 'description': perf_query.description, 'duration': perf_query.duration, 'authors': authors, 'images': images, 'audios': audios})
+    result.update({'id': perf_query.id, 'tag': perf_query.tag, 'name': perf_query.name, 'image_link': perf_query.thumbnail_link, 'description': perf_query.description, 'duration': perf_query.duration, 'authors': authors, 'images': images, 'audios': audios, 'price': perf_query.price})
     return result

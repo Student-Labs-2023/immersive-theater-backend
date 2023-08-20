@@ -1,7 +1,10 @@
 from . models import Authors, PerfomanceAuthors, PerfomanceImages, Perfomances, AudioImages, Audio, Places
-from app.utils import get_all_info_about_perfomance
+from app.utils import get_all_info_about_perfomance, generate_ticket
 from flask import Blueprint, request
+from app.yoomoneyPayment import createPayment, checkPayment
 import json
+import requests
+
 
 api = Blueprint('api', __name__)
 
@@ -27,7 +30,7 @@ def page_perfomances():
             images.append(audio_image.image_link)
         place_query = Places.query.filter_by(id=place_id).first()
         place.update({'name': place_query.name, 'latitude': place_query.latitude, 'longitude': place_query.longitude, 'address': place_query.address})
-        result.append({'id': perfomance.id, 'tag':perfomance.tag, 'name': perfomance.name, 'image_link':perfomance.cover_image_link, 'authors':authors, 'duration': perfomance.duration, 'first_place': {'place': place, 'name': audio_query.name,'audio_link': audio_query.audio_link, 'short_audio_link': audio_query.short_audio_link, 'images': images}})
+        result.append({'id': perfomance.id, 'tag':perfomance.tag, 'name': perfomance.name, 'image_link':perfomance.cover_image_link, 'authors':authors, 'duration': perfomance.duration, 'first_place': {'place': place, 'name': audio_query.name,'audio_link': audio_query.audio_link, 'short_audio_link': audio_query.short_audio_link, 'images': images}, 'price': perfomance.price})
     return json.dumps({"data": result}), 200
 
 
@@ -38,3 +41,22 @@ def perfomance_by_id(perfomance_id):
         return json.dumps(result), 200
     else: 
         return '', 400
+
+@api.route('/payment', methods=['GET'])
+def payment():
+    user_id_num = request.args.get('user_id', default = None, type = int)
+    performance_id_num = request.args.get('performance_id', default = None, type = int)
+    label_str = str(user_id_num) + ':' + str(performance_id_num)
+    price = Perfomances.query.filter_by(id=performance_id_num).first().price
+    performance_name = Perfomances.query.filter_by(id=performance_id_num).first().name
+    return createPayment(label_str, price, performance_name)
+
+@api.route('/notification', methods=['POST'])
+def notification():
+    # TODO: Fix json view 
+    #request_data = json.loads(next(iter(request.form.keys())))
+    #print(request_data)
+    #label_str = request_data['label']
+    #generate_ticket(label_str)
+    return '', 200        
+        
