@@ -1,6 +1,7 @@
 from . models import Authors, PerfomanceAuthors, PerfomanceImages, Perfomances, AudioImages, Audio, Places, Payments
 import string, random
 from . import db 
+import requests
 
 def generate_ticket(label_str):
     user_id, perfomance_id = label_str.split(":")

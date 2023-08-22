@@ -4,6 +4,7 @@ from flask import Blueprint, request
 from app.yoomoneyPayment import createPayment, checkPayment
 import json
 import requests
+from . minioWorker import upload_file
 
 
 api = Blueprint('api', __name__)
@@ -44,7 +45,7 @@ def perfomance_by_id(perfomance_id):
 
 @api.route('/payment', methods=['GET'])
 def payment():
-    user_id_num = request.args.get('user_id', default = None, type = int)
+    user_id_num = request.args.get('user_id', default = None, type = str)
     performance_id_num = request.args.get('performance_id', default = None, type = int)
     label_str = str(user_id_num) + ':' + str(performance_id_num)
     price = Perfomances.query.filter_by(id=performance_id_num).first().price
@@ -53,10 +54,8 @@ def payment():
 
 @api.route('/notification', methods=['POST'])
 def notification():
-    # TODO: Fix json view 
-    #request_data = json.loads(next(iter(request.form.keys())))
-    #print(request_data)
-    #label_str = request_data['label']
-    #generate_ticket(label_str)
+    label_str = request.form.to_dict()['label']
+    generate_ticket(label_str)
     return '', 200        
-        
+    
+
