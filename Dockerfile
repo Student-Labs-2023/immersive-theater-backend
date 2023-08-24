@@ -1,11 +1,11 @@
-FROM python:3.10.12
+FROM python:slim
 
 WORKDIR /immersive-theater
 
 COPY . /immersive-theater
 
-RUN pip3.10 install -r requirements.txt
+RUN pip install -r requirements.txt
 
 EXPOSE 5000
 
-CMD [ "python3.10", "app.py" ]
+CMD [ "python", "app.py" ]
