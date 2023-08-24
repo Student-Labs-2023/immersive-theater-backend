@@ -14,19 +14,3 @@ def createPayment(label, price, name):
 
     return str(quickpay.redirected_url), 200
 
-def checkPayment(label):        #New payment add in start of list history
-    client = Client(token)
-    history = client.operation_history(label=label)
-    s = str()
-    print(history.operations[0].status)
-    for operation in history.operations:
-        s += "Operation:" + str(operation.operation_id)
-        s += "\nStatus     -->" + str(operation.status)
-        s += "\nDatetime   -->" + str(operation.datetime)
-        s += "\nTitle      -->" + str(operation.title)
-        s += "\nPattern id -->" + str(operation.pattern_id)
-        s += "\nDirection  -->" + str(operation.direction)
-        s += "\nAmount     -->" + str(operation.amount)
-        s += "\nLabel      -->" + str(operation.label)
-        s += "\nType       -->" + str(operation.type) + '\n'
-    return s

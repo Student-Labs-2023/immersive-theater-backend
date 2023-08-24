@@ -90,8 +90,10 @@ class Places(db.Model):
 class Payments(db.Model):
     user_id = db.Column(db.String, primary_key=True)
     perfomance_id  = db.Column(db.Integer, db.ForeignKey('perfomances.id'), primary_key=True)
-    ticket_link = db.Column(db.String(50), primary_key=True)
-    status = db.Column(db.String(30), nullable=False)
+    operation_id = db.Column(db.String(50), primary_key=True)
+    sender = db.Column(db.String(20), nullable=False)
+    amount = db.Column(db.String(10), nullable=False)
+    perfomance_used = db.Column(db.Boolean, nullable=False, default=False)
 
     def __init__(self, **kwargs):
         super(Payments, self).__init__(**kwargs)
