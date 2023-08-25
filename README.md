@@ -8,7 +8,7 @@ For start immersive-theater-backend you need:
 or 
 
 1. <code>docker pull f0xyt/immersive-theater</code>
-2. <code>docker run -p <port>:5000 f0xyt/immersive-theater</code>
+2. <code>docker run -p "port":5000 f0xyt/immersive-theater</code>
 
-port -- the port on which the API will be located
+"port" -- the port on which the API will be located
 
