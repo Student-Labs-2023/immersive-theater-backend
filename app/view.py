@@ -1,73 +1,56 @@
-from . models import Authors, PerfomanceAuthors, PerfomanceImages, Perfomances, AudioImages, Audio, Places, Payments
-from app.utils import get_all_info_about_perfomance, generate_ticket, set_perfomance_used, check_user_access
+from . models import Authors, PerformanceAuthors, PerformanceImages, Performances, AudioImages, Audios, Places, Payments, Base
+from app.utils import get_all_info_about_performance, get_short_info_about_performance, generate_ticket, set_performance_used, check_user_access
 from flask import Blueprint, request
 from app.yoomoneyPayment import createPayment
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
 import json
 import requests
+from dotenv import load_dotenv
+import os
 
+
+load_dotenv()
 
 api = Blueprint('api', __name__)
 
-@api.route('/perfomances', methods=['GET'])
-def page_perfomances():
+engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI'))
+session = sessionmaker(bind=engine)
+s = session()
+
+@api.route('/performances', methods=['GET'])
+def page_performances():
     page_num = request.args.get('page', default = 1, type = int)
     per_page_num = request.args.get('per_page', default = 5, type = int)
     user_id = request.args.get('user_id', type=str)
+    user_performances = request.args.get('user_performances', default = 0, type = int)
 
     result = list()
     
-    perf_query = Perfomances.query.filter(Perfomances.id >= (page_num-1)*per_page_num, Perfomances.id <= page_num*per_page_num).all()
-    
-    for perfomance in perf_query:
-        authors = list()
-        place = dict()
-        images = list()
-    
-        authors_id_query = PerfomanceAuthors.query.filter_by(perfomance_id=perfomance.id).all()
-        for author in authors_id_query:
-            authors_query = Authors.query.filter_by(id=author.author_id).first()
-            authors.append({'id': authors_query.id, 'full_name': authors_query.full_name, 'image_link': authors_query.thumbnail_link, 'role': author.role})
-        
-        audio_query = Audio.query.filter_by(perfomance_id=perfomance.id).first()
-        
-        place_id = audio_query.place_id
-        
-        audio_id = audio_query.id
-        
-        audio_images_query = AudioImages.query.filter_by(audio_id=audio_id).all()
-        for audio_image in audio_images_query:
-            images.append(audio_image.image_link)
-        
-        place_query = Places.query.filter_by(id=place_id).first()
-        place.update({'name': place_query.name, 'latitude': place_query.latitude, 'longitude': place_query.longitude, 'address': place_query.address})
-
-        
-        payment_query = Payments.query.filter_by(user_id=user_id, perfomance_id=perfomance.id, perfomance_used=False).first()
-        if not payment_query:
-            access = False
-        else:
-            access = True
-
-        result.append({'id': perfomance.id, 'tag':perfomance.tag, 'name': perfomance.name, 'image_link':perfomance.cover_image_link, 'authors':authors, 'duration': perfomance.duration, 'first_place': {'place': place, 'name': audio_query.name,'audio_link': audio_query.audio_link, 'short_audio_link': audio_query.short_audio_link, 'images': images}, 'price': perfomance.price, 'access': access})
+    for i in range((page_num - 1)*(per_page_num), page_num*per_page_num):
+        performance = get_short_info_about_performance(i, user_id)
+        if performance:
+            result.append(performance)     
     return json.dumps({"data": result}), 200
 
 
-@api.route('/perfomances/<int:perfomance_id>', methods=['GET'])
-def perfomance_by_id(perfomance_id):
+@api.route('/performances/<int:performance_id>', methods=['GET'])
+def performance_by_id(performance_id):
     user_id = request.args.get('user_id', type=str)
-    result = get_all_info_about_perfomance(perfomance_id, user_id)
+    result = get_all_info_about_performance(performance_id, user_id)
     if result.__class__ != Exception:
         return json.dumps(result), 200
     else: 
-        return '', 400
+        return 'Invalid args', 400
 
 @api.route('/payment', methods=['GET'])
 def payment():
     user_id_num = request.args.get('user_id', default = None, type = str)
     performance_id_num = request.args.get('performance_id', default = None, type = int)
     label_str = str(user_id_num) + ':' + str(performance_id_num)
-    price = Perfomances.query.filter_by(id=performance_id_num).first().price
-    performance_name = Perfomances.query.filter_by(id=performance_id_num).first().name
+    for row in s.query(Performances).filter(Performances.id == performance_id_num):
+        price = row.price
+        performance_name = row.name
     return createPayment(label_str, price, performance_name)
 
 @api.route('/notification', methods=['POST'])
@@ -79,55 +62,15 @@ def notification():
     generate_ticket(label_str, operation_id, sender, amount)
     return '', 200        
     
-@api.route('/perfomance_used', methods=['POST'])
-def perfomance_used():
+@api.route('/performance_used', methods=['POST'])
+def performance_used():
     user_id = request.args.get('user_id', type=str)
-    perfomance_id = request.args.get('perfomance_id', type=int)
-    return set_perfomance_used(user_id, perfomance_id)
+    performance_id = request.args.get('performance_id', type=int)
+    return set_performance_used(user_id, performance_id)
 
-@api.route('/my_perfomances', methods=['GET'])
-def my_perfomances():
-    page_num = request.args.get('page', default = 1, type = int)
-    per_page_num = request.args.get('per_page', default = 5, type = int)
-    user_id = request.args.get('user_id', type=str)
-
-    result = list()
-    
-    perf_query = Perfomances.query.filter(Perfomances.id >= (page_num-1)*per_page_num, Perfomances.id <= page_num*per_page_num).all()
-    
-    for perfomance in perf_query:
-        
-        payment_query = Payments.query.filter_by(user_id=user_id, perfomance_id=perfomance.id, perfomance_used=False).first()
-        if not payment_query:
-            continue
-
-        authors = list()
-        place = dict()
-        images = list()
-    
-        authors_id_query = PerfomanceAuthors.query.filter_by(perfomance_id=perfomance.id).all()
-        for author in authors_id_query:
-            authors_query = Authors.query.filter_by(id=author.author_id).first()
-            authors.append({'id': authors_query.id, 'full_name': authors_query.full_name, 'image_link': authors_query.thumbnail_link, 'role': author.role})
-        
-        audio_query = Audio.query.filter_by(perfomance_id=perfomance.id).first()
-        
-        place_id = audio_query.place_id
-        
-        audio_id = audio_query.id
-        
-        audio_images_query = AudioImages.query.filter_by(audio_id=audio_id).all()
-        for audio_image in audio_images_query:
-            images.append(audio_image.image_link)
-        
-        place_query = Places.query.filter_by(id=place_id).first()
-        place.update({'name': place_query.name, 'latitude': place_query.latitude, 'longitude': place_query.longitude, 'address': place_query.address})
-
-        result.append({'id': perfomance.id, 'tag':perfomance.tag, 'name': perfomance.name, 'image_link':perfomance.cover_image_link, 'authors':authors, 'duration': perfomance.duration, 'first_place': {'place': place, 'name': audio_query.name,'audio_link': audio_query.audio_link, 'short_audio_link': audio_query.short_audio_link, 'images': images}, 'price': perfomance.price, 'access': True})
-    return json.dumps({"data": result}), 200
-
-@api.route('/perfomance_access', methods=['POST'])
-def perfomance_access():
+@api.route('/performance_access', methods=['POST'])
+def performance_access():
     user_id = request.form.to_dict()['user_id']
-    perfomance_id = request.form.to_dict()['perfomance_id']
-    return check_user_access(user_id, perfomance_id)
+    performance_id = request.form.to_dict()['performance_id']
+    return check_user_access(user_id, performance_id)
+

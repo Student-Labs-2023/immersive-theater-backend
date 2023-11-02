@@ -1,102 +1,106 @@
-from . import db
+from sqlalchemy import create_engine, Integer, String, Double, Boolean, ForeignKey
+from sqlalchemy.schema import Column
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declarative_base
+from dotenv import load_dotenv
+import os
 
-class Authors(db.Model):
-    id = db.Column(db.Integer, primary_key=True, nullable=False)
-    full_name = db.Column(db.String(300), nullable=False)
-    thumbnail_link = db.Column(db.String(300), nullable=False)
 
-    def __init__(self, **kwargs):
-        super(Authors, self).__init__(**kwargs)
+load_dotenv()
 
-    def __repr__(self):
-        return f"<authors {self.id}>"
+engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI'))
 
-class PerfomanceAuthors(db.Model):
-    author_id = db.Column(db.Integer, db.ForeignKey('authors.id'), primary_key=True)
-    perfomance_id = db.Column(db.Integer, db.ForeignKey('perfomances.id'), primary_key=True)
-    role = db.Column(db.String(60), nullable=False)
+Base = declarative_base()
 
-    def __init__(self, **kwargs):
-        super(PerfomanceAuthors, self).__init__(**kwargs)
-    
-    def __repr__(self):
-        return f"<perfomance_authors {self.author_id}>"
+class Authors(Base):
+    __tablename__ = 'Authors'
 
-class PerfomanceImages(db.Model):
-    perfomance_id = db.Column(db.Integer, db.ForeignKey('perfomances.id'), primary_key=True)
-    image_link = db.Column(db.String(300), primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True)
+    full_name = Column(String(250), nullable=False)
+    thumbnail_link = Column(String(300), nullable=False)
 
-    def __init__(self, **kwargs):
-        super(PerfomanceImages, self).__init__(**kwargs)
+    PerformanceAuthor = relationship("PerformanceAuthors")
 
-    def __repr__(self):
-        return f"<perfomance_images {self.perfomance_id}>"
+class Performances(Base):
+    __tablename__ = 'Performances'
 
-class Perfomances(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.String(300), nullable=False)
-    duration = db.Column(db.Integer, nullable=False)
-    cover_image_link = db.Column(db.String(300), nullable=False)
-    thumbnail_link = db.Column(db.String(300), nullable=False)
-    tag = db.Column(db.String(20), nullable=False)
-    price = db.Column(db.Integer, nullable=False)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
+    description = Column(String(300), nullable=False)
+    duration = Column(Integer, nullable=False)
+    cover_image_link = Column(String(300), nullable=False)
+    thumbnail_link = Column(String(300), nullable=False)
+    tag = Column(String(20), nullable=False)
+    price = Column(Integer, nullable=False)
 
-    def __init__(self, **kwargs):
-        super(Perfomances, self).__init__(**kwargs)
-    
-    def __repr__(self):
-        return f"<perfomances {self.id}>"
+    PerformanceAuthor = relationship("PerformanceAuthors")
+    PerformanceImage = relationship("PerformanceImages")
+    Audio = relationship("Audios")
+    Payment = relationship("Payments")
 
-class AudioImages(db.Model):
-    audio_id = db.Column(db.Integer, db.ForeignKey('audio.id'), primary_key=True)
-    image_link = db.Column(db.String(300), nullable=False, primary_key=True)
-    
-    def __init__(self, **kwargs):
-        super(AudioImages, self).__init__(**kwargs)
+class PerformanceAuthors(Base):
+    __tablename__ = 'PerformanceAuthors'
 
-    def __repr__(self):
-        return f"<audio_images {self.audio_id}>"
+    author_id = Column(Integer, ForeignKey("Authors.id"), primary_key=True)
+    performance_id = Column(Integer, ForeignKey("Performances.id"), primary_key=True)
+    role = Column(String(60), nullable=False)
 
-class Audio(db.Model):
-    perfomance_id = db.Column(db.Integer, db.ForeignKey('perfomances.id'), primary_key=True)
-    order = db.Column(db.Integer, primary_key=True)
-    id = db.Column(db.Integer, nullable=False)
-    place_id = db.Column(db.Integer, db.ForeignKey('places.id'))
-    name = db.Column(db.String(100), nullable=False)
-    audio_link = db.Column(db.String(300), nullable=False)
-    short_audio_link = db.Column(db.String(300), nullable=False)
-    description = db.Column(db.String(300), nullable=False)
+    Author = relationship("Authors")
+    Performance = relationship("Performances")
 
-    def __init__(self, **kwargs):
-        super(Audio, self).__init__(**kwargs)
+class PerformanceImages(Base):
+    __tablename__ = 'PerformanceImages'
 
-    def __repr__(self):
-        return f"<audio {self.id}, {self.name}>"
+    performance_id = Column(Integer, ForeignKey("Performances.id"), primary_key=True)
+    image_link = Column(String(300), nullable=False, primary_key=True)
 
-class Places(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    latitude = db.Column(db.Double, nullable=False)
-    longitude = db.Column(db.Double, nullable=False)
-    address = db.Column(db.String(100), nullable=False)
+    Performance = relationship("Performances")
 
-    def __init__(self, **kwargs):
-        super(Places, self).__init__(**kwargs)
+class Places(Base):
+    __tablename__ = 'Places'
 
-    def __repr__(self):
-        return f"<places {self.id}>"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
+    latitude = Column(Double, nullable=False)
+    longitude = Column(Double, nullable=False)
+    address = Column(String(100), nullable=False)
 
-class Payments(db.Model):
-    user_id = db.Column(db.String, primary_key=True)
-    perfomance_id  = db.Column(db.Integer, db.ForeignKey('perfomances.id'), primary_key=True)
-    operation_id = db.Column(db.String(50), primary_key=True)
-    sender = db.Column(db.String(20), nullable=False)
-    amount = db.Column(db.String(10), nullable=False)
-    perfomance_used = db.Column(db.Boolean, nullable=False, default=False)
+    Audio = relationship("Audios")
 
-    def __init__(self, **kwargs):
-        super(Payments, self).__init__(**kwargs)
+class Audios(Base):
+    __tablename__ = 'Audios'
 
-    def __repr__(self):
-        return f"<payments {self.user_id}, {self.perfomance_id}>"
+    performance_id = Column(Integer, ForeignKey("Performances.id"), primary_key=True)
+    order = Column(Integer, primary_key=True)
+    id = Column(Integer, nullable=False, unique=True)
+    place_id = Column(Integer, ForeignKey("Places.id"))
+    name = Column(String(100), nullable=False)
+    audio_link = Column(String(300), nullable=False)
+    short_audio_link = Column(String(300), nullable=False)
+    description = Column(String(300), nullable=False)
+
+    Performance = relationship("Performances")
+    Place = relationship("Places")
+    AudioImage = relationship("AudioImages")
+
+class AudioImages(Base):
+    __tablename__ = 'AudioImages'
+
+    audio_id = Column(Integer, ForeignKey("Audios.id"), primary_key=True)
+    image_link = Column(String(300), nullable=False, primary_key=True)
+
+    Audio = relationship("Audios")
+
+class Payments(Base):
+    __tablename__ = 'Payments'
+
+    user_id = Column(String(50), primary_key=True)
+    performance_id = Column(Integer, ForeignKey("Performances.id"))
+    operation_id = Column(String(50), nullable=False)
+    sender = Column(String(50), nullable=False)
+    amount = Column(String(10), nullable=False)
+    performance_used = Column(Boolean, nullable=False, default=False)
+
+    Performance = relationship("Performances")
+
+Base.metadata.create_all(engine)

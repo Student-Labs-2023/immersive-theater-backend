@@ -1,71 +1,129 @@
-from . models import Authors, PerfomanceAuthors, PerfomanceImages, Perfomances, AudioImages, Audio, Places, Payments
+from . models import Authors, PerformanceAuthors, PerformanceImages, Performances, AudioImages, Audios, Places, Payments
 import string, random
 from . import db 
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
 import requests
+from dotenv import load_dotenv
+import os
 
-def check_user_access(user_id, perfomance_id):
-    user_payment = Payments.query.filter_by(perfomance_id=perfomance_id, user_id=user_id, perfomance_used=False).first()
+
+load_dotenv()
+
+engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI'))
+session = sessionmaker(bind=engine)
+s = session()
+
+def check_user_access(user_id, performance_id):
+    user_payment = s.query(Payments).filter(Payments.performance_id == performance_id).filter(
+                   Payments.user_id == user_id).filter(Payments.performance_used == False).first()
     if not user_payment:
         return '' ,400
     return '', 200
 
-
-def set_perfomance_used(user_id, perfomance_id):
-    user_payment = Payments.query.filter_by(perfomance_id=perfomance_id, user_id=user_id, perfomance_used=False).first()
+def set_performance_used(user_id, performance_id):
+    user_payment = s.query(Payments).filter(Payments.performance_id == performance_id).filter(
+            Payments.user_id == user_id).filter(Payments.performance_used == False).first()
     if not user_payment:
         return 'Bad requests' ,400
-    user_payment.perfomance_used = True
+    user_payment.performance_used = True
     db.session.commit()
     return '', 200
 
 def generate_ticket(label_str, operation_id, sender, amount):
-    user_id, perfomance_id = label_str.split(":")
+    user_id, performance_id = label_str.split(":")
     ticket = str()
     for i in range(1, 17):
         ticket += random.choice(string.ascii_letters)
         if i % 4 == 0 and i !=16:
             ticket += '-'
-    payment = Payments(user_id=user_id, perfomance_id=perfomance_id, operation_id=operation_id, sender=sender, amount=amount, perfomance_used=False)
+    payment = Payments(user_id=user_id, performance_id=performance_id, operation_id=operation_id, sender=sender, amount=amount, performance_used=False)
     db.session.add(payment)
     db.session.commit()
     return ticket
 
+def get_short_info_about_performance(performance_id, user_id):
+    result = dict()
+    authors = list()
+    images = list()
+    first_place = list()
+    
 
-def get_all_info_about_perfomance(perfomance_id, user_id):
+    for row in s.query(Performances).filter(Performances.id == performance_id):
+        result.update({'id': row.id, 'tag': row.tag, 'name': row.name, 'image_link': row.thumbnail_link, 'duration': row.duration, 'price': row.price})
+
+    for row in s.query(PerformanceAuthors, Authors).filter(
+            PerformanceAuthors.author_id == Authors.id).filter(
+            PerformanceAuthors.performance_id == performance_id).all():
+                authors.append({'id': row.Authors.id, 'full_name': row.Authors.full_name,
+                'image_link': row.Authors.thumbnail_link, 'role': row.PerformanceAuthors.role})
+   
+    if authors:
+        result.update({'authors': authors})
+
+    for row in s.query(Audios, AudioImages).filter(
+            Audios.performance_id == performance_id).filter(
+                    Audios.id == AudioImages.audio_id).all():
+                if row.AudioImages.image_link:
+                    images.append(row.AudioImages.image_link)
+
+    for row in s.query(Audios, Places).filter(
+            Audios.performance_id == performance_id).filter(
+            Audios.place_id == Places.id):
+                first_place.append({'place': {'name': row.Places.name, 'longitude': row.Places.longitude,
+                                    'latitude': row.Places.latitude, 'address': row.Places.address},
+                                    'name': row.Audios.name, 'audio_link': row.Audios.audio_link, 
+                                    'short_audio_link': row.Audios.short_audio_link, 'images' : images})
+    if first_place:
+        result.update({'first_place': first_place})
+
+    for row in s.query(Payments).filter(
+            Payments.performance_id==performance_id).filter(
+            Payments.user_id==user_id).filter(
+            Payments.performance_used==False):
+                result.update({'access': row.performance_used})
+    
+    
+    return result
+    
+
+def get_all_info_about_performance(performance_id, user_id):
     result = dict()
     authors = list()
     images = list()
     audios = list()
-    place = dict()
+    places = list()
     
-    perf_query = Perfomances.query.filter_by(id=perfomance_id).first()
-    if not perf_query:
+    perf_query = s.query(Performances).filter(Performances.id == performance_id).first()
+    if perf_query == None:
         return Exception("Invalid id")
     
-    authors_id_query = PerfomanceAuthors.query.filter_by(perfomance_id=perfomance_id).all()
-    for author in authors_id_query:
-        authors_query = Authors.query.filter_by(id=author.author_id).first()
-        authors.append({'id': authors_query.id, 'full_name': authors_query.full_name, 'image_link': authors_query.thumbnail_link, 'role': author.role})
+    for row in s.query(PerformanceAuthors, Authors).filter(
+            PerformanceAuthors.author_id == Authors.id).filter(
+            PerformanceAuthors.performance_id == performance_id).all():
+                authors.append({'id': row.Authors.id, 'full_name': row.Authors.full_name,
+                'image_link': row.Authors.thumbnail_link, 'role': row.PerformanceAuthors.role})
     
-    audios_query = Audio.query.filter_by(perfomance_id=perfomance_id).all()
-    for audio in audios_query:
-        audio_images_query = AudioImages.query.filter_by(audio_id=audio.id).all()
-        audio_images = list()
-        for audio_image in audio_images_query:
-            audio_images.append(str(audio_image.image_link))
-        places_query = Places.query.filter_by(id=audio.place_id).first()
-        audios.append({'place': {'name': places_query.name, 'latitude': places_query.latitude, 'longitude': places_query.longitude, 'address': places_query.address}, 'name':audio.name, 'audio_link': audio.audio_link, 'short_audio_link': audio.short_audio_link, 'images': audio_images})
-    
-    images_query = PerfomanceImages.query.filter_by(perfomance_id=perfomance_id).all()
-    for image in images_query:
-        images.append(str(image.image_link))
-    
-    payment_query = Payments.query.filter_by(perfomance_id=perfomance_id, user_id=user_id, perfomance_used=False).first()
-    if not payment_query:
-        access = False
-    else:
-        access = True
+    for row in s.query(Audios, AudioImages).filter(
+            Audios.performance_id == performance_id).filter(
+                    Audios.id == AudioImages.audio_id).all():
+                if row.AudioImages.image_link:
+                    images.append(row.AudioImages.image_link)
 
-    result.update({'id': perf_query.id, 'tag': perf_query.tag, 'name': perf_query.name, 'image_link': perf_query.thumbnail_link, 'description': perf_query.description, 'duration': perf_query.duration, 'authors': authors, 'images': images, 'audios': audios, 'price': perf_query.price, 'access': access})
+    for row in s.query(Audios, Places).filter(
+            Audios.performance_id == performance_id).filter(
+            Audios.place_id == Places.id).all():
+                places.append({'place': {'name': row.Places.name, 'longitude': row.Places.longitude,
+                                    'latitude': row.Places.latitude, 'address': row.Places.address},
+                                    'name': row.Audios.name, 'audio_link': row.Audios.audio_link, 
+                                    'short_audio_link': row.Audios.short_audio_link, 'images' : images})
+    
+    for row in s.query(Payments).filter(
+            Payments.performance_id==performance_id).filter(
+            Payments.user_id==user_id).filter(
+            Payments.performance_used==False):
+                result.update({'access': not row.performance_used})
+
+    result.update({'id': perf_query.id, 'tag': perf_query.tag, 'name': perf_query.name, 'image_link': perf_query.thumbnail_link, 'description': perf_query.description, 'duration': perf_query.duration, 'authors': authors, 'images': images, 'audios': places, 'price': perf_query.price})
 
     return result

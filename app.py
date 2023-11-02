@@ -2,7 +2,7 @@ import os
 from app import create_app
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from app.models import Authors, PerfomanceAuthors, PerfomanceImages, Perfomances, AudioImages, Audio, Places
+from app.models import Authors, PerformanceAuthors, PerformanceImages, Performances, AudioImages, Audios, Places
 from app import db
 from adminDashboard.admin import create_admin_dashboard
 
