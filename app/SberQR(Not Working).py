@@ -10,16 +10,16 @@ import requests
 from SberQR import AsyncSberQR
 from SberQR.types import CancelType
 
-member_id = '00003698'  
-tid = '29148600'  # ID  терминала/Точки. Получить в ЛК Сбрербанк бизнес на странице Информация о точке
-id_qr = '3001039094'  # Номер наклейки с QR-кодом. Получить в ЛК Сбрербанк бизнес Информация о точке/список оборудования
-client_id = '06203e91-28c9-4fab-a833-44b28d1027fd'  # получить на api.developer.sber.ru
-client_secret = '37bc021b-7495-4877-babf-d741cf103997'  # получить на api.developer.sber.ru
+member_id = os.getenv('SBER_MEMBER_ID')  
+tid = os.getenv('SBER_TID')    # ID  терминала/Точки. Получить в ЛК Сбрербанк бизнес на странице Информация о точке
+id_qr = os.getenv('SBER_ID_QR')  # Номер наклейки с QR-кодом. Получить в ЛК Сбрербанк бизнес Информация о точке/список оборудования
+client_id = os.getenv('SBER_CLIENT_ID')  # получить на api.developer.sber.ru
+client_secret = os.getenv('SBER_CLIENT_SECRET')  # получить на api.developer.sber.ru
 
 #
 crt_from_pkcs12 = f'{os.getcwd()}/client_cert.crt'  # Для асинхронной версии требуется распаковать сертификат
 key_from_pkcs12 = f'{os.getcwd()}/private.key'  # Для асинхронной версии требуется распаковать приватный ключ
-pkcs12_password = 'Ktybyf45'  # Пароль от файла сертификат. Получается на api.developer.sber.ru
+pkcs12_password = os.getenv('SBER_PKCS12_PASSWORD')  # Пароль от файла сертификат. Получается на api.developer.sber.ru
 russian_crt = f'{os.getcwd()}/Cert_CA.pem'  # Сертификат мин.цифры для установления SSL соединения
 
 sber_qr = AsyncSberQR(member_id,
